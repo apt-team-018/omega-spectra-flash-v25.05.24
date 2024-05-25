@@ -11,22 +11,24 @@ import shutil
 import random
 import math
 from huggingface_hub import HfFolder, snapshot_download
+import uuid
 
 class OmegaSpectraFlashInference:
-    def __init__(self, device='cuda'):
+    def __init__(self, device='cuda:0'):
         """
         Initialize the inference class with specified device.
         Input:
             device (str): The device (e.g., 'cuda:0' or 'cpu') where the model will run.
         """
-        model_path = os.getenv("MODEL_PATH", "qxsecureserver/omega-spectra-flash-v25.05.24")
-        self.image_upload_endpoint = os.getenv("IMAGE_UPLOAD_ENDPOINT", "https://llm-service.qxlabai.com/v1/omega/text-to-image/upload?requestId=5345366")
-        self.image_upload_apikey = os.getenv("IMAGE_UPLOAD_APIKEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBsaWNhdGlvbiI6Im1tLWxsbS1zZXJ2aWNlIiwiZW52IjoiREVWIiwiaWF0IjoxNzE0NTU3NzE4fQ.XCdZOc4ymJfpUp5vJxDq3fwgAA4nNqvR-mUdxMgpR8U")
-        token = os.getenv("TOKEN", "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")
+        model_path = os.getenv("MODEL_PATH", "")
+        self.image_upload_endpoint = os.getenv("IMAGE_UPLOAD_ENDPOINT", "")
+        self.image_upload_apikey = os.getenv("IMAGE_UPLOAD_APIKEY", "")
+        token = os.getenv("TOKEN", "")
         print("Args: ", {"MODEL_PATH": model_path, "device": device})
         
-        hf_folder = HfFolder()
-        hf_folder.save_token(token)
+        if token != None and len(token) > 0:
+            hf_folder = HfFolder()
+            hf_folder.save_token(token)
 
         # Check for GPU availability and set up DataParallel if multiple GPUs are available
         self.device = device
@@ -115,5 +117,5 @@ class OmegaSpectraFlashInference:
         image_object.save(img_byte_arr, format='PNG')
         img_byte_arr = img_byte_arr.getvalue()
         files = {'image': ('image.png', img_byte_arr, 'image/png')}
-        response = requests.post(self.image_upload_endpoint, headers=headers, files=files)
+        response = requests.post(f"{self.image_upload_endpoint}?requestId={str(uuid.uuid4())}", headers=headers, files=files)
         return response.json()['data']

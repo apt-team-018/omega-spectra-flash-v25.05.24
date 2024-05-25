@@ -30,10 +30,23 @@ queue = asyncio.Queue(maxsize=queue_size)  # Limit queue size dynamically
 model_cycle = cycle(models.keys())
 
 # Check if all required environment variables are available, not null, and non-empty
+required_env_vars = ["MODEL_PATH", "IMAGE_UPLOAD_ENDPOINT", "IMAGE_UPLOAD_APIKEY"]
+
+for var in required_env_vars:
+    value = os.getenv(var)
+    if not value:
+        raise RuntimeError(f"Environment variable {var} is not set or is empty")
+
+# Retrieve API keys from environment variable, split by comma, filter valid keys
 api_keys_raw = os.getenv("API_KEYS", "")
 API_KEYS = {key: {'type': 'standard'} for key in api_keys_raw.split(',') if len(key) == 32 and re.match(r'^[a-zA-Z0-9]+$', key)}
 
 api_key_header = APIKeyHeader(name="X-API-Key")
+
+def get_api_key(api_key: str = Depends(api_key_header)):
+    if API_KEYS and (api_key not in API_KEYS):
+        raise HTTPException(status_code=403, detail="Invalid API Key")
+    return api_key
 
 request_counter = 0
 
