@@ -97,3 +97,4 @@ wrapt
 xformers
 yarl
 zipp
+uuid==1.30
