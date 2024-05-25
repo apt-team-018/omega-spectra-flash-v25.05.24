@@ -25,17 +25,10 @@ ENV IMAGE_UPLOAD_APIKEY=${IMAGE_UPLOAD_APIKEY}
 # Define optional environment variables
 ENV API_KEYS=${API_KEYS:-""}
 ENV TOKEN=${TOKEN:-""}
-ENV WORKERS=${WORKERS:-20}
 
 # Validate and set QUEUE_BATCH_SIZE as an integer
-ARG DEFAULT_QUEUE_BATCH_SIZE=4
+ARG DEFAULT_QUEUE_BATCH_SIZE=10
 ENV QUEUE_BATCH_SIZE=${QUEUE_BATCH_SIZE}
 
-RUN if ! echo "$QUEUE_BATCH_SIZE" | grep -E '^[0-9]+$'; then \
-        echo "Invalid QUEUE_BATCH_SIZE value, setting to default ${DEFAULT_QUEUE_BATCH_SIZE}"; \
-        QUEUE_BATCH_SIZE=${DEFAULT_QUEUE_BATCH_SIZE}; \
-    fi && \
-    export QUEUE_BATCH_SIZE
-
 # Define the command to run the application
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 8080 --workers ${WORKERS}"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080",  "--workers", "12"]
