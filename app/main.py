@@ -12,22 +12,9 @@ from itertools import cycle
 import re
 import os
 import random
-from generate_image_data_v2 import OmegaSpectraFlashInference  # Ensure this module is correctly set up
+from generate_images import OmegaSpectraFlashInference  # Ensure this module is correctly set up
 
 app = FastAPI()
-
-# Determine the number of GPUs available
-num_gpus = torch.cuda.device_count()
-gpus = [f'cuda:{i}' for i in range(num_gpus)]
-models = {gpu: OmegaSpectraFlashInference(device=gpu) for gpu in gpus}
-gpu_semaphore = asyncio.Semaphore(num_gpus)  # Semaphore to limit concurrent requests to the number of GPUs
-
-# Set the queue size to 4 times the number of GPUs
-queue_size = num_gpus * 4
-queue = asyncio.Queue(maxsize=queue_size)  # Limit queue size dynamically
-
-# Cycle through available GPUs
-model_cycle = cycle(models.keys())
 
 # Check if all required environment variables are available, not null, and non-empty
 required_env_vars = ["MODEL_PATH", "IMAGE_UPLOAD_ENDPOINT", "IMAGE_UPLOAD_APIKEY"]
@@ -36,6 +23,12 @@ for var in required_env_vars:
     value = os.getenv(var)
     if not value:
         raise RuntimeError(f"Environment variable {var} is not set or is empty")
+
+try:
+    queue_batch_size = int(os.getenv("QUEUE_BATCH_SIZE", 4))
+except ValueError:
+    queue_batch_size = 4  # Default value if conversion fails
+return batch_size
 
 # Retrieve API keys from environment variable, split by comma, filter valid keys
 api_keys_raw = os.getenv("API_KEYS", "")
@@ -48,12 +41,22 @@ def get_api_key(api_key: str = Depends(api_key_header)):
         raise HTTPException(status_code=403, detail="Invalid API Key")
     return api_key
 
-request_counter = 0
+# Determine the number of GPUs available
+num_gpus = torch.cuda.device_count()
+gpus = [f'cuda:{i}' for i in range(num_gpus)]
+models = {gpu: OmegaSpectraFlashInference(device=gpu) for gpu in gpus}
+gpu_semaphore = asyncio.Semaphore(num_gpus)  # Semaphore to limit concurrent requests to the number of GPUs
 
-def get_api_key(api_key: str = Depends(api_key_header)):
-    if API_KEYS and (api_key not in API_KEYS):
-        raise HTTPException(status_code=403, detail="Invalid API Key")
-    return api_key
+# Set the queue size to queue_batch_size times the number of GPUs
+queue_size = num_gpus * queue_batch_size
+queue = asyncio.Queue(maxsize=queue_size)  # Limit queue size dynamically
+
+print("Configs: ", {"QUEUE SIZE": queue_size})
+
+# Cycle through available GPUs
+model_cycle = cycle(models.keys())
+
+request_counter = 0
 
 class RequestBody(BaseModel):
     prompt: str
