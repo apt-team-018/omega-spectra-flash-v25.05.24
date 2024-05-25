@@ -23,6 +23,7 @@ ENV IMAGE_UPLOAD_APIKEY=${IMAGE_UPLOAD_APIKEY}
 # Define optional environment variables
 ENV API_KEYS=${API_KEYS:-""}
 ENV TOKEN=${TOKEN:-""}
+ENV WORKERS=${WORKERS:-20}
 
 # Define the command to run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080",  "--workers", "20"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080",  "--workers", "${WORKERS}"]
