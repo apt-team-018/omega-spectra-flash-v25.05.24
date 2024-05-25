@@ -11,7 +11,6 @@ certifi
 charset-normalizer
 click
 colorful
-git+https://github.com/all-secure-src/apt-diffusers-v190524.git
 distlib
 exceptiongroup
 fastapi

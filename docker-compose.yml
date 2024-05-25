@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - MODEL_PATH=/path/to/model
+      - API_KEYS=
+      - TOKEN=
+      - QUEUE_BATCH_SIZE=10
