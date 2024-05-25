@@ -55,10 +55,10 @@ def get_api_key(api_key: str = Depends(api_key_header)):
 
 class RequestBody(BaseModel):
     prompt: str
-    negative_prompt: Optional[str] = Field(default="", max_length=50)
+    negative_prompt: Optional[str] = Field(default="", max_length=70)
     steps: Optional[int] = Field(default=8, ge=4, le=50)
     num_of_images: Optional[int] = Field(default=1, ge=1, le=4)
-    resolution: Optional[str] = Field(default="512x768")
+    resolution: Optional[str] = Field(default="1024|1024")
     seed: Optional[int] = Field(default_factory=lambda: random.randint(1, 2147483647), ge=0, le=2147483647)
     guidance_scale: Optional[float] = Field(default=3.0, ge=0.1, le=6.0)
 
