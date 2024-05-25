@@ -28,7 +28,6 @@ try:
     queue_batch_size = int(os.getenv("QUEUE_BATCH_SIZE", 4))
 except ValueError:
     queue_batch_size = 4  # Default value if conversion fails
-return batch_size
 
 # Retrieve API keys from environment variable, split by comma, filter valid keys
 api_keys_raw = os.getenv("API_KEYS", "")
