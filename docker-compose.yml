@@ -6,6 +6,9 @@ services:
       - "8080:8080"
     environment:
       - MODEL_PATH=/path/to/model
+      - IMAGE_UPLOAD_ENDPOINT=
+      - IMAGE_UPLOAD_APIKEY=
+      - UPLOAD_IMAGE_STATIC_PATH=
       - API_KEYS=
       - TOKEN=
       - QUEUE_BATCH_SIZE=10
