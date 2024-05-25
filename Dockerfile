@@ -2,15 +2,17 @@
 # Use the official Python image as a parent image
 FROM python:3.10.14
 
-# Set the working directory
+# Set the working directory to /app
 WORKDIR /app
 
-COPY requirements.txt .
+# Copy the current directory contents into the container at /app
+COPY . /app
 
+# Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code to the working directory
-COPY app /app/app
+# Ensure the app directory is in the PYTHONPATH
+ENV PYTHONPATH=/app
 
 # Expose the port that the app runs on
 EXPOSE 8080
