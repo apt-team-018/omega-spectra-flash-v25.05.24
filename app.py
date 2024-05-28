@@ -55,7 +55,7 @@ def get_api_key(api_key: str = Depends(api_key_header)):
 
 class RequestBody(BaseModel):
     prompt: str
-    negative_prompt: Optional[str] = Field(default="", max_length=70)
+    negative_prompt: Optional[str] = Field(default="", max_length=210)
     steps: Optional[int] = Field(default=8, ge=4, le=50)
     num_of_images: Optional[int] = Field(default=1, ge=1, le=4)
     resolution: Optional[str] = Field(default="1024|1024")
